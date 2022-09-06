@@ -1,0 +1,40 @@
+name: Build cv in LaTeX and export PDF 
+
+#on: push
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  build_latex:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Set up Git repository
+        uses: actions/checkout@v2
+
+      - name: Compile LaTeX document
+        uses: xu-cheng/latex-action@v2
+        with:
+          root_file: cv.tex
+          latexmk_use_lualatex: true
+
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+      
+      - name: Rename file
+        run: cp cv.pdf cv_eduardo_lopez_madrid_${{ steps.date.outputs.date }}.pdf
+
+      - name: Upload to artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: cv_pdf
+          path: cv_eduardo_lopez_madrid_${{ steps.date.outputs.date }}.pdf
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: cv_eduardo_lopez_madrid_${{ steps.date.outputs.date }}.pdf
+          
